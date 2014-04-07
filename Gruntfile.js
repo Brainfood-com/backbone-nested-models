@@ -41,6 +41,9 @@ module.exports = function (grunt) {
                     if (url.indexOf('src/scripts/') === 0) {
                         url = './.grunt/grunt-contrib-jasmine/' + url;
                     }
+                    if (url.indexOf('test/specs/') === 0) {
+                        url = './.grunt/grunt-contrib-jasmine/' + url;
+                    }
                     //console.log('url=' + url);
                     return oldLoad.apply(this, [context, moduleName, url]);
                 };
@@ -219,7 +222,10 @@ module.exports = function (grunt) {
 
         jasmine: {
             all: {
-                src: '<%= yeoman.src %>/scripts/{,**/}*.js',
+                src: [
+                    '<%= yeoman.src %>/scripts/{,**/}*.js',
+                    'test/specs/**/*.spec.js',
+                ],
                 options: {
                     specs: 'test/specs/**/*.spec.js',
                     template: require('grunt-template-jasmine-istanbul'),

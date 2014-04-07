@@ -206,10 +206,12 @@ module.exports = function (grunt) {
             specs: {
                 options: {
                     globals: {
+                        beforeEach: false,
                         define: false,
                         describe: false,
                         expect: false,
                         it: false,
+                        jasmine: false,
                     }
                 },
                 files: {

@@ -22,7 +22,7 @@ define(
             var validation = _.extend({}, oldValidation);
             var found;
             var f = function(value) {
-                if (value === validateNestedValue) {
+                if (typeof value === 'object' && value.fn === validateNestedValue) {
                     found = true;
                 }
             };
@@ -44,7 +44,7 @@ define(
                     found = false;
                     _.each(validators, f);
                     if (!found) {
-                        validators.push(validateNestedValue);
+                        validators.push({fn: validateNestedValue});
                     }
                 }
             }
@@ -57,21 +57,21 @@ define(
             modelClass.prototype[methodName] = function() {
                 var oldValidation = updateValidation(this);
                 try {
-                    if (originalMethod) {
-                        return originalMethod.apply(this, arguments);
-                    } else {
-                        return modelClass.__super__[methodName].apply(this, arguments);
-                    }
+                    return originalMethod.apply(this, arguments);
                 } finally {
                     this.validation = oldValidation;
                 }
             };
+            return modelClass;
         }
 
         function wrapSetFunction(modelClass) {
             var originalMethod = modelClass.prototype.set;
             modelClass.prototype.set = function(key, val, options) {
                 var attr, attrs, curVal, nestedOptions, newVal;
+                if (typeof(key) === 'undefined') {
+                    return this;
+                }
                 if (key === null) {
                     return this;
                 }
@@ -93,23 +93,15 @@ define(
                         }
                     }
                 }
-                if (originalMethod) {
-                    return originalMethod.call(this, attrs, options);
-                } else {
-                    return modelClass.__super__.set.call(this, attrs, options);
-                }
+                return originalMethod.call(this, attrs, options);
             };
+            return modelClass;
         }
 
         function wrapToJSONFunction(modelClass) {
             var originalMethod = modelClass.prototype.toJSON;
             modelClass.prototype.toJSON = function(options) {
-                var result;
-                if (originalMethod) {
-                    result = originalMethod.apply(this, arguments);
-                } else {
-                    result = modelClass.__super__.toJSON.apply(this, arguments);
-                }
+                var result = originalMethod.apply(this, arguments);
                 if (options && options.deep) {
                     _.each(result, function(value, key) {
                         if (value instanceof Backbone.Model) {
@@ -119,6 +111,7 @@ define(
                 }
                 return result;
             };
+            return modelClass;
         }
 
         var NestedModels = {
@@ -128,12 +121,17 @@ define(
             wrapToJSONFunction: wrapToJSONFunction,
             wrapValidationFunction: wrapValidationFunction,
 
+            wrapValidationFunctions: function(modelClass) {
+                modelClass = wrapValidationFunction(modelClass, 'isValid');
+                modelClass = wrapValidationFunction(modelClass, 'validate');
+                modelClass = wrapValidationFunction(modelClass, 'preValidate');
+                return modelClass;
+            },
+
             mixin: function(modelClass) {
-                wrapSetFunction(modelClass);
-                wrapToJSONFunction(modelClass);
-                wrapValidationFunction(modelClass, 'isValid');
-                wrapValidationFunction(modelClass, 'validate');
-                wrapValidationFunction(modelClass, 'preValidate');
+                modelClass = NestedModels.wrapSetFunction(modelClass);
+                modelClass = NestedModels.wrapToJSONFunction(modelClass);
+                modelClass = NestedModels.wrapValidationFunctions(modelClass);
                 return modelClass;
             },
         };

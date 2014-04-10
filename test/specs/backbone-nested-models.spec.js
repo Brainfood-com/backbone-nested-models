@@ -189,6 +189,33 @@ define(function(require) {
             } else {
                 expect(top.counts).toBeUndefined();
             }
+
+            result = top.set('nested', {address1: '1234 Main St.'}, {merge: true, parse: true});
+            expect(result).toBe(top);
+            var cidsSetnestedpojoparse = extractCids(top);
+            expect(cidsSetnestedmerge.top).toEqual(cidsSetnestedpojoparse.top);
+            expect(cidsSetnestedmerge.nested).toEqual(cidsSetnestedpojoparse.nested);
+            expect(top.get('name')).toEqual('value');
+            expect(top.get('nested').get('address1')).toEqual('1234 Main St.');
+            if (checkCounts) {
+                expect(top.counts).toEqual({set: 7});
+            } else {
+                expect(top.counts).toBeUndefined();
+            }
+
+            result = top.set('nested', {address1: '4321 Main St.'}, {merge: true});
+            expect(result).toBe(top);
+            var cidsSetnestedpojo = extractCids(top);
+            expect(cidsSetnestedpojoparse.top).toEqual(cidsSetnestedpojo.top);
+            expect(cidsSetnestedpojo.nested).toBeUndefined();
+            expect(top.get('name')).toEqual('value');
+            expect(top.get('nested')).not.toEqual(jasmine.any(Backbone.Model));
+            expect(top.get('nested').address1).toEqual('4321 Main St.');
+            if (checkCounts) {
+                expect(top.counts).toEqual({set: 8});
+            } else {
+                expect(top.counts).toBeUndefined();
+            }
         }
         it('set-mixin-plain', function() {
             testSet.call(this, NestedModels.mixin(Top), false);

@@ -83,13 +83,18 @@ define(
                     (attrs = {})[key] = val;
                 }
                 if (options && options.merge) {
-                    nestedOptions = {silent: false, merge: true};
+                    nestedOptions = {silent: false, merge: true, parse: options.parse};
                     for (attr in attrs) {
                         curVal = this.get(attr);
                         newVal = attrs[attr];
-                        if (curVal instanceof Backbone.Model && newVal instanceof Backbone.Model)  {
-                            delete attrs[attr];
-                            curVal.set(newVal.attributes, nestedOptions);
+                        if (curVal instanceof Backbone.Model) {
+                            if (newVal instanceof Backbone.Model)  {
+                                delete attrs[attr];
+                                curVal.set(newVal.attributes, nestedOptions);
+                            } else if (options.parse && typeof newVal === 'object') {
+                                delete attrs[attr];
+                                curVal.set(newVal, nestedOptions);
+                            }
                         }
                     }
                 }

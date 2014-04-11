@@ -10,10 +10,30 @@ define(
     ) {
         'use strict';
 
+        function extractNestedErrors(errors) {
+            var result = {};
+            for (var key in errors) {
+                var value = errors[key];
+                if (value.errors) {
+                    value = extractNestedErrors(value.errors);
+                }
+                result[key] = value;
+            }
+            return result;
+        }
+
         function validateNestedValue(attrValue, attrName) {
-            attrValue.validate();
+            var errors = attrValue.validate();
             var isValid = attrValue.isValid();
-            return isValid ? null : (attrName + ' is invalid');
+            if (isValid) {
+                return null;
+            }
+            var r = {};
+            r.toString = function() {
+                return attrName + ' is invalid';
+            };
+            r.errors = errors;
+            return r;
         }
 
         function updateValidation(model) {
@@ -120,6 +140,7 @@ define(
         }
 
         var NestedModels = {
+            extractNestedErrors: extractNestedErrors,
             validateNestedValue: validateNestedValue,
 
             wrapSetFunction: wrapSetFunction,

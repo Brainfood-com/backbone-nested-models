@@ -290,10 +290,15 @@ define(function(require) {
             expect(top.isValid()).toBeUndefined();
             result = top.validate();
             expect(result).not.toBeNull();
+            expect(result.nested).not.toEqual(jasmine.any(String));
+            expect(result.nested.toString()).toEqual('nested is invalid');
+            result = NestedModels.extractNestedErrors(result);
             rKeys = _.keys(result).sort();
             expect(rKeys).toEqual(['name', 'nested']);
             expect(result.name).toEqual(jasmine.any(String));
-            expect(result.nested).toEqual(jasmine.any(String));
+            expect(_.keys(result.nested).sort()).toEqual(['address1', 'countryGeoId']);
+            expect(result.nested.address1).toEqual(jasmine.any(String));
+            expect(result.nested.countryGeoId).toEqual(jasmine.any(String));
             expect(top.isValid()).toBe(false);
             if (checkCounts) {
                 expect(top.counts).toEqual({set: 1, isValid: 2, validate: 1});
@@ -335,10 +340,15 @@ define(function(require) {
             ];
             result = top.validate();
             expect(result).not.toBeNull();
+            expect(result.nested).not.toEqual(jasmine.any(String));
+            expect(result.nested.toString()).toEqual('nested is invalid');
+            result = NestedModels.extractNestedErrors(result);
             rKeys = _.keys(result).sort();
             expect(rKeys).toEqual(['name', 'nested']);
             expect(result.name).toEqual('name IS required');
-            expect(result.nested).toEqual(jasmine.any(String));
+            expect(_.keys(result.nested).sort()).toEqual(['address1', 'countryGeoId']);
+            expect(result.nested.address1).toEqual(jasmine.any(String));
+            expect(result.nested.countryGeoId).toEqual(jasmine.any(String));
             if (checkCounts) {
                 expect(top.counts).toEqual({set: 1, isValid: 2, validate: 4});
             } else {
@@ -348,10 +358,14 @@ define(function(require) {
             top.get('nested').set('address1', '1234 Main St.');
             result = top.validate();
             expect(result).not.toBeNull();
+            expect(result.nested).not.toEqual(jasmine.any(String));
+            expect(result.nested.toString()).toEqual('nested is invalid');
+            result = NestedModels.extractNestedErrors(result);
             rKeys = _.keys(result).sort();
             expect(rKeys).toEqual(['name', 'nested']);
             expect(result.name).toEqual('name IS required');
-            expect(result.nested).toEqual(jasmine.any(String));
+            expect(_.keys(result.nested).sort()).toEqual(['countryGeoId']);
+            expect(result.nested.countryGeoId).toEqual(jasmine.any(String));
             if (checkCounts) {
                 expect(top.counts).toEqual({set: 1, isValid: 2, validate: 5});
             } else {
@@ -361,10 +375,14 @@ define(function(require) {
             top.get('nested').set('countryGeoId', 'foobar');
             result = top.validate();
             expect(result).not.toBeNull();
+            expect(result.nested).not.toEqual(jasmine.any(String));
+            expect(result.nested.toString()).toEqual('nested is invalid');
+            result = NestedModels.extractNestedErrors(result);
             rKeys = _.keys(result).sort();
             expect(rKeys).toEqual(['name', 'nested']);
             expect(result.name).toEqual('name IS required');
-            expect(result.nested).toEqual(jasmine.any(String));
+            expect(_.keys(result.nested).sort()).toEqual(['countryGeoId']);
+            expect(result.nested.countryGeoId).toEqual(jasmine.any(String));
             if (checkCounts) {
                 expect(top.counts).toEqual({set: 1, isValid: 2, validate: 6});
             } else {
